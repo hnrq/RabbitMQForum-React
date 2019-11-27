@@ -4,12 +4,12 @@ export default class Message {
   constructor(
     content: string = "new message",
     createdOn: Date,
-    subject: string = "",
+    type: string = "",
     id: string
   ) {
     this.content = content;
     this.createdOn = createdOn;
-    this.subject = subject;
+    this.type = type;
     this.id = id;
   }
 
@@ -17,7 +17,7 @@ export default class Message {
 
   createdOn: Date;
 
-  subject: string;
+  type: string;
 
   id: string;
 }

@@ -1,6 +1,8 @@
 import { Stomp } from "@stomp/stompjs";
 import * as types from "types";
 import * as actions from "actions";
+import { normalize } from "normalizr";
+import { message as messageSchema } from "schemas/message";
 
 const socketMiddleware = () => {
   let socket;
@@ -16,10 +18,11 @@ const socketMiddleware = () => {
             subscription = socket.subscribe(
               `/exchange/subject_logs/${action.payload.subject}`,
               message => {
-                console.log(message.body);
-                store.dispatch(
-                  actions.receiveMessage(JSON.parse(message.body))
+                const { entities } = normalize(
+                  JSON.parse(message.body),
+                  messageSchema
                 );
+                store.dispatch(actions.createMessageSuccess(entities.message));
               }
             );
           });
@@ -27,8 +30,11 @@ const socketMiddleware = () => {
           subscription = socket.subscribe(
             `/exchange/subject_logs/${action.payload.subject}`,
             message => {
-              console.log(message.body);
-              store.dispatch(actions.receiveMessage(JSON.parse(message.body)));
+              const { entities } = normalize(
+                JSON.parse(message.body),
+                messageSchema
+              );
+              store.dispatch(actions.createMessageSuccess(entities.message));
             }
           );
         }
@@ -37,12 +43,6 @@ const socketMiddleware = () => {
         subscription.unsubscribe();
         console.log("unsubscribed");
         break;
-      case types.SEND_MESSAGE:
-        socket.send(
-          `/exchange/subject_logs/${action.messageType}`,
-          {},
-          JSON.stringify(action.payload)
-        );
       default:
         return next(action);
     }

@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useLocation } from "react-router-dom";
-import { sendMessage, clearMessages, wsConnect, wsDisconnect } from "actions";
+import {
+  createMessageAction,
+  clearMessages,
+  wsConnect,
+  wsDisconnect
+} from "actions";
 import { useSelector, useDispatch } from "react-redux";
 import { Message } from "components/Message";
 import classNames from "classnames";
@@ -16,18 +21,21 @@ const ChatPage = () => {
   const handleSubmit = e => {
     e.preventDefault();
     if (location.pathname.includes("monitor"))
-      dispatch(sendMessage(value, `${params.subject}.answer`));
-    else dispatch(sendMessage(value, `${params.subject}.question`));
+      dispatch(createMessageAction(value, `${params.subject}.answer`));
+    else dispatch(createMessageAction(value, `${params.subject}.question`));
   };
 
   useEffect(() => {
     if (location.pathname.includes("monitor"))
       dispatch(
-        wsConnect("ws://127.0.0.1:15674/ws", `${params.subject}.question`)
+        wsConnect(
+          process.env.REACT_APP_SOCKET_URL,
+          `${params.subject}.question`
+        )
       );
     else
       dispatch(
-        wsConnect("ws://127.0.0.1:15674/ws", `${params.subject}.answer`)
+        wsConnect(process.env.REACT_APP_SOCKET_URL, `${params.subject}.answer`)
       );
     return () => {
       dispatch(wsDisconnect());
@@ -46,8 +54,8 @@ const ChatPage = () => {
                   message={message}
                   key={key}
                   classList={classNames({
-                    "question bg-dark": message.subject.includes("question"),
-                    "answer bg-primary": message.subject.includes("answer")
+                    "question bg-dark": message.type.includes("question"),
+                    "answer bg-primary": message.type.includes("answer")
                   })}
                 />
               ))}

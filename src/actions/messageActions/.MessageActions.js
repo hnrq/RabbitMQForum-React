@@ -11,12 +11,12 @@ export const clearMessages = () => ({
   type: types.CLEAR_MESSAGES
 });
 
-export const createMessage = () => ({
-  type: types.CREATE_MESSAGE_REQUEST
-});
-
 export const receiveMessage = () => ({
   type: types.RECEIVE_MESSAGE
+});
+
+export const createMessage = () => ({
+  type: types.CREATE_MESSAGE_REQUEST
 });
 
 export const createMessageSuccess = (message: Message) => ({

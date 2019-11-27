@@ -2,16 +2,13 @@
 import * as types from "types";
 import Message from "models/Message";
 import { normalize } from "normalizr";
+import type { AxiosError, AxiosResponse } from "axios";
+import axios from "axios";
+import type { Dispatch } from "react-redux";
 import { message as messageSchema } from "schemas/message";
-import uuid from "uuid";
 
 export const clearMessages = () => ({
   type: types.CLEAR_MESSAGES
-});
-
-export const receiveMessage = (message: Message) => ({
-  type: types.RECEIVE_MESSAGE,
-  payload: message
 });
 
 export const wsConnect = (host: string, subject: string) => ({
@@ -42,12 +39,36 @@ export const wsDisconnected = (host: string) => ({
   host
 });
 
-export const sendMessage = (content: string, messageType: string) => {
-  const message = new Message(content, new Date(), messageType, uuid());
-  const { entities } = normalize(message, messageSchema);
-  return {
-    type: types.SEND_MESSAGE,
-    payload: entities.message,
-    messageType
-  };
+export const createMessage = () => ({
+  type: types.CREATE_MESSAGE_REQUEST
+});
+
+export const createMessageSuccess = (message: Message) => ({
+  type: types.CREATE_MESSAGE_SUCCESS,
+  payload: message
+});
+
+export const createMessageFailure = (error: AxiosError) => ({
+  type: types.CREATE_MESSAGE_FAILURE,
+  error
+});
+
+export const createMessageAction = (content: string, type: string) => (
+  dispatch: Dispatch
+) => {
+  dispatch(createMessage());
+  return axios
+    .post("/api/messages", {
+      content,
+      type
+    })
+    .then(
+      (response: AxiosResponse<Message>) => {
+        const { entities } = normalize(response.data, messageSchema);
+        dispatch(createMessageSuccess(entities.message));
+      },
+      (reject: AxiosError<any>) => {
+        dispatch(createMessageFailure(reject));
+      }
+    );
 };
