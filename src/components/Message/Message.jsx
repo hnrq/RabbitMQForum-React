@@ -1,4 +1,3 @@
-// @flow
 import React from "react";
 import MessageModel from "models/Message";
 import moment from "moment";
